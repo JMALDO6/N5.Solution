@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using N5.Application.Commands.Permission.Modify;
 using N5.Application.Commands.Permission.Request;
 using N5.Application.DTOs.Permission;
+using N5.Application.Queries.Permission.GetAll;
 using Serilog;
 
 namespace N5.API.Controllers
@@ -32,7 +33,7 @@ namespace N5.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> RequestPermission([FromBody] PermissionDto permissionDto)
         {
@@ -59,7 +60,15 @@ namespace N5.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Update an existing permission.
+        /// </summary>
+        /// <param name="permissionDto"></param>
+        /// <returns></returns>
         [HttpPatch]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> ModifyPermission([FromBody] PermissionDto permissionDto)
         {
             try
@@ -89,6 +98,23 @@ namespace N5.API.Controllers
                 Log.Error("An error occurred while processing the permission modification.");
                 return StatusCode(500, "An error occurred while processing your request.");
             }
+        }
+
+        /// <summary>
+        /// GetPermission retrieves a permission by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetPermission(int id)
+        {
+            Log.Information("Operation: get by id");
+            var result = await _mediator.Send(new GetPermissionByIdQuery(id));
+
+            return result != null ? Ok(result) : NotFound();
         }
     }
 }

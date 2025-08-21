@@ -9,16 +9,17 @@ namespace N5.Application.Commands.Permission.Request
     /// </summary>
     internal class RequestPermissionHandler : IRequestHandler<RequestPermissionCommand, int>
     {
-        private readonly IPermissionRepository _permissionRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RequestPermissionHandler> _logger;
 
         /// <summary>
         /// Constructor for RequestPermissionHandler.
         /// </summary>
-        /// <param name="permissionRepository"></param>
-        public RequestPermissionHandler(IPermissionRepository permissionRepository, ILogger<RequestPermissionHandler> logger)
+        /// <param name="unitOfWork"></param>
+        /// <param name="logger"></param>
+        public RequestPermissionHandler(IUnitOfWork unitOfWork, ILogger<RequestPermissionHandler> logger)
         {
-            _permissionRepository = permissionRepository;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -34,8 +35,8 @@ namespace N5.Application.Commands.Permission.Request
 
             try
             {
-                _logger.LogInformation("{messagePrefix} Handling RequestPermissionCommand for employee {EmployeeName} {EmployeeLastName}",
-                     messagePrefix, request.Permission.EmployeeName, request.Permission.EmployeeLastName);
+                _logger.LogInformation("Handling RequestPermissionCommand for employee {EmployeeName} {EmployeeLastName}",
+                     request.Permission.EmployeeName, request.Permission.EmployeeLastName);
 
                 var permission = new Domain.Entities.Permission
                 {
@@ -44,7 +45,7 @@ namespace N5.Application.Commands.Permission.Request
                     PermissionTypeId = request.Permission.PermissionTypeId,
                     PermissionDate = request.Permission.PermissionDate
                 };
-                await _permissionRepository.AddAsync(permission);
+                await _unitOfWork.Permissions.AddAsync(permission);
 
                 _logger.LogInformation("{messagePrefix} Permission created successfully with ID {PermissionId}", messagePrefix, permission.Id);
 

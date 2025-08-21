@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using N5.Application;
 using N5.Domain.Interfaces;
 using N5.Infrastructure.Persistence;
-using N5.Infrastructure.Repositories;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +20,7 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddDbContext<PermissionsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
 // Configure Serilog from appsettings.json

@@ -1,15 +1,17 @@
-﻿using N5.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using N5.Domain.Entities;
 using N5.Domain.Interfaces;
-using N5.Infrastructure.Persistence;
-using System.Security.Cryptography;
 
-namespace N5.Infrastructure.Repositories
+namespace N5.Infrastructure.Persistence
 {
     /// <summary>
     /// Permission repository implementation for managing permissions in the data source.
     /// </summary>
     public class PermissionRepository : IPermissionRepository
     {
+        /// <summary>
+        /// Context for accessing the permissions database.
+        /// </summary>
         private readonly PermissionsDbContext _context;
 
         /// <summary>
@@ -24,28 +26,19 @@ namespace N5.Infrastructure.Repositories
         /// <inheritdoc/>
         public async Task<int> AddAsync(Permission permission)
         {
-            _context.Permissions.Add(permission);
-            await _context.SaveChangesAsync();
+            await _context.Permissions.AddAsync(permission);
+
             return permission.Id;
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<Permission>> GetAllAsync()
+        public async Task<IEnumerable<Permission>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.Permissions.ToListAsync();
         }
 
         /// <inheritdoc/>
-        public async Task<Permission?> GetByIdAsync(int id)
-        {
-            return await _context.Permissions.FindAsync(id);
-        }
-
-        /// <inheritdoc/>
-        public Task SaveAsync()
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<Permission> GetByIdAsync(int id) => await _context.Permissions.FindAsync(id);
 
         /// <inheritdoc/>
         public async Task<Permission> Update(Permission permission)

@@ -4,29 +4,45 @@ using N5.Domain.Interfaces;
 
 namespace N5.Application.Commands.Permission.Modify
 {
+    /// <summary>
+    /// ModifyPermissionHandler handles the ModifyPermissionCommand to update existing permissions.
+    /// </summary>
     internal class ModifyPermissionHandler : IRequestHandler<ModifyPermissionCommand, int>
     {
-        private readonly IPermissionRepository _permissionRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ModifyPermissionHandler> _logger;
 
-        public ModifyPermissionHandler(IPermissionRepository permissionRepository, ILogger<ModifyPermissionHandler> logger)
+        /// <summary>
+        /// Ctor for ModifyPermissionHandler.
+        /// </summary>
+        /// <param name="unitOfWork"></param>
+        /// <param name="logger"></param>
+        public ModifyPermissionHandler(IUnitOfWork unitOfWork, ILogger<ModifyPermissionHandler> logger)
         {
-            _permissionRepository = permissionRepository;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
+
+        /// <summary>
+        /// Handle the ModifyPermissionCommand to update an existing permission.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="ApplicationException"></exception>
         public async Task<int> Handle(ModifyPermissionCommand request, CancellationToken cancellationToken)
         {
             var messagePrefix = "Executing [ModifyPermissionHandler]";
 
             try
             {
-                _logger.LogInformation("{messagePrefix} Handling ModifyPermissionCommand for employee {EmployeeName} {EmployeeLastName} and ID {ID}",
-                     messagePrefix, request.Permission.EmployeeName, request.Permission.EmployeeLastName, request.Permission.Id);
+                _logger.LogInformation("Handling ModifyPermissionCommand for employee {EmployeeName} {EmployeeLastName} and ID {ID}",
+                     request.Permission.EmployeeName, request.Permission.EmployeeLastName, request.Permission.Id);
 
                 _logger.LogInformation("{messagePrefix} Search if the permission with ID {ID} exists",
                      messagePrefix, request.Permission.Id);
 
-                var existingPermission = await _permissionRepository.GetByIdAsync(request.Permission.Id);
+                var existingPermission = await _unitOfWork.Permissions.GetByIdAsync(request.Permission.Id);
 
                 if (existingPermission is null)
                 {
@@ -39,7 +55,7 @@ namespace N5.Application.Commands.Permission.Modify
                 existingPermission.EmployeeForename = request.Permission.EmployeeName;
                 existingPermission.EmployeeSurname = request.Permission.EmployeeLastName;
 
-                await _permissionRepository.Update(existingPermission);
+                await _unitOfWork.Permissions.Update(existingPermission);
 
                 _logger.LogInformation("{messagePrefix} Permission updated successfully with ID {PermissionId}", messagePrefix, existingPermission.Id);
 

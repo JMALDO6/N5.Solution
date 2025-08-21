@@ -32,11 +32,5 @@ namespace N5.Domain.Interfaces
         /// </summary>
         /// <param name="permission"></param>
         Task<Permission> Update(Permission permission);
-
-        /// <summary>
-        /// Saves all changes made in the repository to the data source asynchronously.
-        /// </summary>
-        /// <returns></returns>
-        Task SaveAsync();
     }
 }
