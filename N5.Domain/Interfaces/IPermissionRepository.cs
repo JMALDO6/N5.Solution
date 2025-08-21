@@ -25,19 +25,18 @@ namespace N5.Domain.Interfaces
         /// </summary>
         /// <param name="permission"></param>
         /// <returns></returns>
-        Task AddAsync(Permission permission);
+        Task<int> AddAsync(Permission permission);
 
         /// <summary>
         /// Updates an existing permission in the data source.
         /// </summary>
         /// <param name="permission"></param>
-        void Update(Permission permission);
+        Task<Permission> Update(Permission permission);
 
         /// <summary>
         /// Saves all changes made in the repository to the data source asynchronously.
         /// </summary>
         /// <returns></returns>
         Task SaveAsync();
-
     }
 }

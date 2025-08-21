@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using N5.Application.Commands.Permission.Modify;
 using N5.Application.Commands.Permission.Request;
 using N5.Application.DTOs.Permission;
 using Serilog;
@@ -30,6 +31,9 @@ namespace N5.API.Controllers
         /// <param name="permissionDto"></param>
         /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> RequestPermission([FromBody] PermissionDto permissionDto)
         {
             try
@@ -51,6 +55,38 @@ namespace N5.API.Controllers
             catch (Exception)
             {
                 Log.Error("An error occurred while processing the permission request.");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> ModifyPermission([FromBody] PermissionDto permissionDto)
+        {
+            try
+            {
+                Log.Information("Operation: modify");
+                if (permissionDto is null || permissionDto.Id <= 0)
+                {
+                    Log.Warning("Valid permission data with ID is required for modification.");
+                    return BadRequest("Valid permission data with ID is required for modification.");
+                }
+
+                var command = new ModifyPermissionCommand { Permission = permissionDto };
+                var id = await _mediator.Send(command);
+
+                if (id == default)
+                {
+                    Log.Information("Permission ID not found for modification.");   
+                    return NotFound("Permission ID not found for modification.");
+                }
+
+                Log.Information("Permission modification processed successfully with ID: {Id}", id);
+
+                return Ok(id);
+            }
+            catch (Exception)
+            {
+                Log.Error("An error occurred while processing the permission modification.");
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }

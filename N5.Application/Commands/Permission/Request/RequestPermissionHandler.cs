@@ -30,10 +30,12 @@ namespace N5.Application.Commands.Permission.Request
         /// <returns></returns>
         public async Task<int> Handle(RequestPermissionCommand request, CancellationToken cancellationToken)
         {
+            var messagePrefix = "Executing [RequestPermissionHandler]";
+
             try
             {
-                _logger.LogInformation("Handling RequestPermissionCommand for employee {EmployeeName} {EmployeeLastName}",
-                     request.Permission.EmployeeName, request.Permission.EmployeeLastName);
+                _logger.LogInformation("{messagePrefix} Handling RequestPermissionCommand for employee {EmployeeName} {EmployeeLastName}",
+                     messagePrefix, request.Permission.EmployeeName, request.Permission.EmployeeLastName);
 
                 var permission = new Domain.Entities.Permission
                 {
@@ -44,14 +46,14 @@ namespace N5.Application.Commands.Permission.Request
                 };
                 await _permissionRepository.AddAsync(permission);
 
-                _logger.LogInformation("Permission created successfully with ID {PermissionId}", permission.Id);
+                _logger.LogInformation("{messagePrefix} Permission created successfully with ID {PermissionId}", messagePrefix, permission.Id);
 
                 return permission.Id;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while handling RequestPermissionCommand for employee {EmployeeName} {EmployeeLastName}",
-                    request.Permission.EmployeeName, request.Permission.EmployeeLastName);
+                _logger.LogError(ex, "{messagePrefix} Error occurred while handling RequestPermissionCommand for employee {EmployeeName} {EmployeeLastName}",
+                    messagePrefix, request.Permission.EmployeeName, request.Permission.EmployeeLastName);
 
                 throw new ApplicationException("Error occurred while handling RequestPermissionCommand", ex);
             }

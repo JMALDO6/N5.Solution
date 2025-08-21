@@ -1,6 +1,7 @@
 ﻿using N5.Domain.Entities;
 using N5.Domain.Interfaces;
 using N5.Infrastructure.Persistence;
+using System.Security.Cryptography;
 
 namespace N5.Infrastructure.Repositories
 {
@@ -47,15 +48,12 @@ namespace N5.Infrastructure.Repositories
         }
 
         /// <inheritdoc/>
-        public void Update(Permission permission)
+        public async Task<Permission> Update(Permission permission)
         {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc/>
-        Task IPermissionRepository.AddAsync(Permission permission)
-        {
-            return AddAsync(permission);
+            _context.Permissions.Update(permission);
+            await _context.SaveChangesAsync();
+            
+            return permission;
         }
     }
 }

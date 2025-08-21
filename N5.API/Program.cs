@@ -32,7 +32,6 @@ builder.Host.UseSerilog((context, config) =>
         .WriteTo.Console()
         .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day);
 });
-builder.Host.UseSerilog();
 
 var app = builder.Build();
 
