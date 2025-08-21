@@ -33,8 +33,7 @@
         /// <summary>
         /// Permission type navigation property
         /// </summary>
-
-        public required PermissionType PermissionType { get; set; }
+        public virtual PermissionType PermissionType { get; set; }
     }
 
 }
