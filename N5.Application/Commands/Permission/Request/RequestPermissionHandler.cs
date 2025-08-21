@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using N5.Domain.Entities;
 using N5.Domain.Interfaces;
 
 namespace N5.Application.Commands.Permission.Request
@@ -10,6 +11,7 @@ namespace N5.Application.Commands.Permission.Request
     internal class RequestPermissionHandler : IRequestHandler<RequestPermissionCommand, int>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPermissionElasticService _elasticClient;
         private readonly ILogger<RequestPermissionHandler> _logger;
 
         /// <summary>
@@ -17,10 +19,12 @@ namespace N5.Application.Commands.Permission.Request
         /// </summary>
         /// <param name="unitOfWork"></param>
         /// <param name="logger"></param>
-        public RequestPermissionHandler(IUnitOfWork unitOfWork, ILogger<RequestPermissionHandler> logger)
+        /// <param name="elasticClient"></param>
+        public RequestPermissionHandler(IUnitOfWork unitOfWork, ILogger<RequestPermissionHandler> logger, IPermissionElasticService elasticClient)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _elasticClient = elasticClient;
         }
 
         /// <summary>
@@ -46,6 +50,8 @@ namespace N5.Application.Commands.Permission.Request
                     PermissionDate = request.Permission.PermissionDate
                 };
                 await _unitOfWork.Permissions.AddAsync(permission);
+                await _unitOfWork.SaveChangesAsync();
+                await IndexPermissionInElasticSearch(permission, cancellationToken);
 
                 _logger.LogInformation("{messagePrefix} Permission created successfully with ID {PermissionId}", messagePrefix, permission.Id);
 
@@ -58,6 +64,31 @@ namespace N5.Application.Commands.Permission.Request
 
                 throw new ApplicationException("Error occurred while handling RequestPermissionCommand", ex);
             }
+        }
+
+        /// <summary>
+        /// Indexes the permission document in Elasticsearch.
+        /// </summary>
+        /// <param name="permission"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task IndexPermissionInElasticSearch(Domain.Entities.Permission permission, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Indexing permission document in Elasticsearch for employee {EmployeeName} {EmployeeLastName}",
+               permission.EmployeeForename, permission.EmployeeSurname);
+
+            var document = new PermissionDocument
+            {
+                Id = permission.Id,
+                EmployeeForename = permission.EmployeeForename,
+                EmployeeSurname = permission.EmployeeSurname,
+                PermissionTypeId = permission.PermissionTypeId,
+                PermissionDate = permission.PermissionDate
+            };
+
+            await _elasticClient.IndexAsync(document, cancellationToken);
+            _logger.LogInformation("Permission document indexed successfully in Elasticsearch for employee {EmployeeName} {EmployeeLastName}",
+                permission.EmployeeForename, permission.EmployeeSurname);
         }
     }
 }
