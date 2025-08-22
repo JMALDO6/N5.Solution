@@ -16,8 +16,9 @@ namespace N5.Domain.Interfaces
         /// Update an existing permission document in Elasticsearch
         /// </summary>
         /// <param name="document"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task UpdateAsync(PermissionDocument document);
+        Task UpdateAsync(PermissionDocument document, CancellationToken cancellationToken);
 
         /// <summary>
         /// Get all permission documents from Elasticsearch

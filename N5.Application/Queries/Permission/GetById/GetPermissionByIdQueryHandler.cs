@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using N5.Application.DTOs.Permission;
+using N5.Application.Helpers;
+using N5.Application.Interfaces;
 using N5.Domain.Interfaces;
 
 namespace N5.Application.Queries.Permission.GetAll
@@ -8,6 +10,7 @@ namespace N5.Application.Queries.Permission.GetAll
     internal class GetPermissionByIdQueryHandler : IRequestHandler<GetPermissionByIdQuery, PermissionDto>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IKafkaProducer _kafkaProducer;
         private readonly ILogger<GetPermissionByIdQueryHandler> _logger;
 
         /// <summary>
@@ -15,10 +18,12 @@ namespace N5.Application.Queries.Permission.GetAll
         /// </summary>
         /// <param name="unitOfWork"></param>
         /// <param name="logger"></param>
-        public GetPermissionByIdQueryHandler(IUnitOfWork unitOfWork, ILogger<GetPermissionByIdQueryHandler> logger)
+        /// <param name="kafkaProducer"></param>
+        public GetPermissionByIdQueryHandler(IUnitOfWork unitOfWork, ILogger<GetPermissionByIdQueryHandler> logger, IKafkaProducer kafkaProducer)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _kafkaProducer = kafkaProducer;
         }
 
         /// <summary>
@@ -34,6 +39,7 @@ namespace N5.Application.Queries.Permission.GetAll
             _logger.LogInformation("Handling GetPermissionByIdQuery for ID {ID}", request.Id);
 
             var permission = await _unitOfWork.Permissions.GetByIdAsync(request.Id);
+            await PublishEvents.PublishEventInKafkaTopic(permission, _logger, _kafkaProducer, "get", cancellationToken);
 
             if (permission == null)
             {

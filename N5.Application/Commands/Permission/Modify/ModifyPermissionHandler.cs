@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using N5.Application.Helpers;
+using N5.Application.Interfaces;
 using N5.Domain.Interfaces;
 
 namespace N5.Application.Commands.Permission.Modify
@@ -10,6 +12,7 @@ namespace N5.Application.Commands.Permission.Modify
     internal class ModifyPermissionHandler : IRequestHandler<ModifyPermissionCommand, int>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IKafkaProducer _kafkaProducer;
         private readonly ILogger<ModifyPermissionHandler> _logger;
 
         /// <summary>
@@ -17,10 +20,12 @@ namespace N5.Application.Commands.Permission.Modify
         /// </summary>
         /// <param name="unitOfWork"></param>
         /// <param name="logger"></param>
-        public ModifyPermissionHandler(IUnitOfWork unitOfWork, ILogger<ModifyPermissionHandler> logger)
+        /// <param name="kafkaProducer"></param>
+        public ModifyPermissionHandler(IUnitOfWork unitOfWork, ILogger<ModifyPermissionHandler> logger, IKafkaProducer kafkaProducer)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _kafkaProducer = kafkaProducer;
         }
 
         /// <summary>
@@ -56,6 +61,7 @@ namespace N5.Application.Commands.Permission.Modify
                 existingPermission.EmployeeSurname = request.Permission.EmployeeLastName;
 
                 await _unitOfWork.Permissions.Update(existingPermission);
+                await PublishEvents.PublishEventInKafkaTopic(existingPermission, _logger, _kafkaProducer, "modify", cancellationToken);
 
                 _logger.LogInformation("{messagePrefix} Permission updated successfully with ID {PermissionId}", messagePrefix, existingPermission.Id);
 

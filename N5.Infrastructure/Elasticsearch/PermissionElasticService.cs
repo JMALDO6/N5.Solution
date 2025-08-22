@@ -28,7 +28,7 @@ namespace N5.Infrastructure.Elasticsearch
         }
 
         /// <inheritdoc />
-        public async Task UpdateAsync(PermissionDocument document)
+        public async Task UpdateAsync(PermissionDocument document, CancellationToken cancellationToken)
         {
             await _elasticClient.IndexAsync(document, idx => idx.Index(IndexName).Id(document.Id));
         }

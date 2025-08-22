@@ -1,9 +1,12 @@
+using Confluent.Kafka;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using N5.API.Helpers;
 using N5.Application;
+using N5.Application.Interfaces;
 using N5.Domain.Interfaces;
 using N5.Infrastructure.Elasticsearch;
+using N5.Infrastructure.Kafka;
 using N5.Infrastructure.Persistence;
 using Nest;
 using Serilog;
@@ -49,6 +52,30 @@ builder.Services.AddSingleton<IElasticClient>(sp =>
     return new ElasticClient(settings);
 });
 builder.Services.AddScoped<IPermissionElasticService, PermissionElasticService>();
+
+// Kafka producer configuration
+var kafkaProducerConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+builder.Services.AddSingleton(new ProducerBuilder<string, string>(kafkaProducerConfig).Build());
+builder.Services.AddScoped<IKafkaProducer, KafkaProducer>();
+
+// Kafka consumer configuration
+var consumerConfig = new ConsumerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"],
+    GroupId = "permission-consumer-group",
+    AutoOffsetReset = AutoOffsetReset.Earliest,
+    EnableAutoCommit = false
+};
+builder.Services.AddSingleton(consumerConfig);
+builder.Services.AddSingleton(sp =>
+{
+    var config = sp.GetRequiredService<ConsumerConfig>();
+    return new ConsumerBuilder<Ignore, string>(config).Build();
+});
+builder.Services.AddHostedService<KafkaConsumer>();
 
 var app = builder.Build();
 
