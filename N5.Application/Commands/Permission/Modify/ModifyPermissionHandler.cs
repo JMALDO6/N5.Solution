@@ -9,7 +9,7 @@ namespace N5.Application.Commands.Permission.Modify
     /// <summary>
     /// ModifyPermissionHandler handles the ModifyPermissionCommand to update existing permissions.
     /// </summary>
-    internal class ModifyPermissionHandler : IRequestHandler<ModifyPermissionCommand, int>
+    public class ModifyPermissionHandler : IRequestHandler<ModifyPermissionCommand, int>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IKafkaProducer _kafkaProducer;

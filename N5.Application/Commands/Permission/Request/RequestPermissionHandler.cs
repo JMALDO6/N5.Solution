@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
-using N5.Application.Events;
 using N5.Application.Helpers;
 using N5.Application.Interfaces;
 using N5.Domain.Interfaces;
@@ -10,7 +9,7 @@ namespace N5.Application.Commands.Permission.Request
     /// <summary>
     /// RequestPermissionHandler handles the RequestPermissionCommand to process permission requests.
     /// </summary>
-    internal class RequestPermissionHandler : IRequestHandler<RequestPermissionCommand, int>
+    public class RequestPermissionHandler : IRequestHandler<RequestPermissionCommand, int>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IKafkaProducer _kafkaProducer;
@@ -21,7 +20,7 @@ namespace N5.Application.Commands.Permission.Request
         /// </summary>
         /// <param name="unitOfWork"></param>
         /// <param name="logger"></param>
-        /// <param name="kafkaProducer"></param>    
+        /// <param name="kafkaProducer"></param>
         public RequestPermissionHandler(IUnitOfWork unitOfWork, ILogger<RequestPermissionHandler> logger, IKafkaProducer kafkaProducer)
         {
             _unitOfWork = unitOfWork;

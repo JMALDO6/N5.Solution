@@ -7,7 +7,10 @@ using N5.Domain.Interfaces;
 
 namespace N5.Application.Queries.Permission.GetAll
 {
-    internal class GetPermissionByIdQueryHandler : IRequestHandler<GetPermissionByIdQuery, PermissionDto>
+    /// <summary>
+    /// GetPermissionByIdQueryHandler handles the retrieval of a permission by its ID.
+    /// </summary>
+    public class GetPermissionByIdQueryHandler : IRequestHandler<GetPermissionByIdQuery, PermissionDto>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IKafkaProducer _kafkaProducer;
@@ -39,7 +42,6 @@ namespace N5.Application.Queries.Permission.GetAll
             _logger.LogInformation("Handling GetPermissionByIdQuery for ID {ID}", request.Id);
 
             var permission = await _unitOfWork.Permissions.GetByIdAsync(request.Id);
-            await PublishEvents.PublishEventInKafkaTopic(permission, _logger, _kafkaProducer, "get", cancellationToken);
 
             if (permission == null)
             {
@@ -47,6 +49,7 @@ namespace N5.Application.Queries.Permission.GetAll
                 return null;
             }
 
+            await PublishEvents.PublishEventInKafkaTopic(permission, _logger, _kafkaProducer, "get", cancellationToken);
             _logger.LogInformation("{messagePrefix} Permission with ID {ID} retrieved successfully", messagePrefix, request.Id);
 
             return new PermissionDto

@@ -1,8 +1,11 @@
-﻿namespace N5.Application.DTOs.Permission
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace N5.Application.DTOs.Permission
 {
     /// <summary>
     /// Permission Data Transfer Object (DTO)
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class PermissionDto
     {
         /// <summary>

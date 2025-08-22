@@ -8,7 +8,7 @@ namespace N5.Application.Events.Handlers
     /// <summary>
     /// PermissionCreatedHandler listens for PermissionRequestedEvent and indexes the permission in Elasticsearch.
     /// </summary>
-    internal class PermissionNotificationHandler : INotificationHandler<PermissionNotificationEvent>
+    public class PermissionNotificationHandler : INotificationHandler<PermissionNotificationEvent>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPermissionElasticService _elasticClient;
@@ -44,7 +44,7 @@ namespace N5.Application.Events.Handlers
                     _logger.LogWarning("Permission with ID {PermissionId} not found in the database.", notification.PermissionId);
                     return;
                 }
-                
+
                 if (notification.Operation == "request")
                 {
                     _logger.LogInformation("Permission with ID {PermissionId} is being indexed in Elasticsearch.", notification.PermissionId);
@@ -56,7 +56,7 @@ namespace N5.Application.Events.Handlers
                     _logger.LogInformation("Permission with ID {PermissionId} is being updated in Elasticsearch.", notification.PermissionId);
                     await UpdatePermissionInElasticSearch(permissionDb, cancellationToken);
                     _logger.LogInformation("Permission with ID {PermissionId} updated successfully in Elasticsearch.", notification.PermissionId);
-                }                
+                }
             }
             catch (Exception ex)
             {
@@ -88,6 +88,12 @@ namespace N5.Application.Events.Handlers
             await _elasticClient.IndexAsync(document, cancellationToken);
         }
 
+        /// <summary>
+        /// Updates the permission document in Elasticsearch.
+        /// </summary>
+        /// <param name="permission"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         private async Task UpdatePermissionInElasticSearch(Permission permission, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Updating permission document in Elasticsearch for employee {EmployeeName} {EmployeeLastName}",

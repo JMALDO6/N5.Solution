@@ -4,6 +4,9 @@ using N5.Application.Interfaces;
 
 namespace N5.Application.Helpers
 {
+    /// <summary>
+    /// PublishEvents is a static class that provides methods to publish permission events to Kafka topics.
+    /// </summary>
     public static class PublishEvents
     {
         /// <summary>
