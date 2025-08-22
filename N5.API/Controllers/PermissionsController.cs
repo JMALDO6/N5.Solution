@@ -85,7 +85,7 @@ namespace N5.API.Controllers
 
                 if (id == default)
                 {
-                    Log.Information("Permission ID not found for modification.");   
+                    Log.Information("Permission ID not found for modification.");
                     return NotFound("Permission ID not found for modification.");
                 }
 
