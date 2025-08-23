@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N5.Application", "N5.Applic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N5.UnitTest", "N5.UnitTest\N5.UnitTest.csproj", "{5B1A6B97-14DC-4817-86FF-5C90E269BE0A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N5.IntegrationTests", "IntegrationTests\N5.IntegrationTests.csproj", "{2EC6AA82-5B28-4D5C-8607-18B441EE856E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N5.IntegrationTests", "N5.IntegrationTests\N5.IntegrationTests.csproj", "{2EC6AA82-5B28-4D5C-8607-18B441EE856E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
