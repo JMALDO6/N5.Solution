@@ -61,6 +61,8 @@ Este repositorio documenta la implementación de una arquitectura modular en .NE
 - Persistencia dual (SQL + Elasticsearch)
 - Flujo completo desde comando → evento → consumidor
 
+  <img width="413" height="148" alt="image" src="https://github.com/user-attachments/assets/00b5fab5-8db4-4521-a797-ed009b29e78c" />
+
 ---
 
 ## 🧠 Autor
