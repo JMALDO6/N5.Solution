@@ -42,5 +42,16 @@ namespace N5.Infrastructure.Elasticsearch
 
             return response.Documents.ToList();
         }
+
+        /// <inheritdoc />
+        public async Task<PermissionDocument> GetPermissionByIdAsync(int id)
+        {
+            var response = await _elasticClient.GetAsync<PermissionDocument>(id);
+
+            if (!response.Found)
+                return null;
+
+            return response.Source;
+        }
     }
 }

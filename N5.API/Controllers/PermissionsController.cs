@@ -31,7 +31,7 @@ namespace N5.API.Controllers
         /// </summary>
         /// <param name="permissionDto"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost("request-permission")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
@@ -65,7 +65,7 @@ namespace N5.API.Controllers
         /// </summary>
         /// <param name="permissionDto"></param>
         /// <returns></returns>
-        [HttpPatch]
+        [HttpPatch("modify-permission")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]

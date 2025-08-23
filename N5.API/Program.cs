@@ -11,87 +11,93 @@ using N5.Infrastructure.Persistence;
 using Nest;
 using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddMediatR(cfg =>
+public partial class Program
 {
-    cfg.RegisterServicesFromAssemblyContaining<ApplicationAssemblyMarker>();
-});
+    private static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-// Configure Entity Framework Core with SQL Server
-builder.Services.AddDbContext<PermissionsDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+        // Add services to the container.
 
-// Configure Serilog from appsettings.json
-builder.Host.UseSerilog((context, config) =>
-{
-    config
-        .ReadFrom.Configuration(context.Configuration)
-        .Enrich.FromLogContext()
-        .WriteTo.Console()
-        .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day);
-});
+        builder.Services.AddControllers();
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<ApplicationAssemblyMarker>();
+        });
 
-// Elasticsearch configuration
-builder.Services.Configure<ElasticsearchSettings>(builder.Configuration.GetSection("Elasticsearch"));
-builder.Services.AddSingleton<IElasticClient>(sp =>
-{
-    var config = sp.GetRequiredService<IOptions<ElasticsearchSettings>>().Value;
+        // Configure Entity Framework Core with SQL Server
+        builder.Services.AddDbContext<PermissionsDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
-    var settings = new ConnectionSettings(new Uri(config.Uri))
-        .DefaultIndex(config.DefaultIndex);
+        // Configure Serilog from appsettings.json
+        builder.Host.UseSerilog((context, config) =>
+        {
+            config
+                .ReadFrom.Configuration(context.Configuration)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day);
+        });
 
-    return new ElasticClient(settings);
-});
-builder.Services.AddScoped<IPermissionElasticService, PermissionElasticService>();
+        // Elasticsearch configuration
+        builder.Services.Configure<ElasticsearchSettings>(builder.Configuration.GetSection("Elasticsearch"));
+        builder.Services.AddSingleton<IElasticClient>(sp =>
+        {
+            var config = sp.GetRequiredService<IOptions<ElasticsearchSettings>>().Value;
 
-// Kafka producer configuration
-var kafkaProducerConfig = new ProducerConfig
-{
-    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
-};
-builder.Services.AddSingleton(new ProducerBuilder<string, string>(kafkaProducerConfig).Build());
-builder.Services.AddScoped<IKafkaProducer, KafkaProducer>();
+            var settings = new ConnectionSettings(new Uri(config.Uri))
+                .DefaultIndex(config.DefaultIndex);
 
-// Kafka consumer configuration
-var consumerConfig = new ConsumerConfig
-{
-    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"],
-    GroupId = "permission-consumer-group",
-    AutoOffsetReset = AutoOffsetReset.Earliest,
-    EnableAutoCommit = false
-};
-builder.Services.AddSingleton(consumerConfig);
-builder.Services.AddSingleton(sp =>
-{
-    var config = sp.GetRequiredService<ConsumerConfig>();
-    return new ConsumerBuilder<Ignore, string>(config).Build();
-});
-builder.Services.AddHostedService<KafkaConsumer>();
+            return new ElasticClient(settings);
+        });
+        builder.Services.AddScoped<IPermissionElasticService, PermissionElasticService>();
 
-var app = builder.Build();
+        // Kafka producer configuration
+        var kafkaProducerConfig = new ProducerConfig
+        {
+            BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+        };
+        builder.Services.AddSingleton(new ProducerBuilder<string, string>(kafkaProducerConfig).Build());
+        builder.Services.AddScoped<IKafkaProducer, KafkaProducer>();
 
-Log.Information("Starting up the application");
+        // Kafka consumer configuration
+        var consumerConfig = new ConsumerConfig
+        {
+            BootstrapServers = builder.Configuration["Kafka:BootstrapServers"],
+            GroupId = "permission-consumer-group",
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = false
+        };
+        builder.Services.AddSingleton(consumerConfig);
+        builder.Services.AddSingleton(sp =>
+        {
+            var config = sp.GetRequiredService<ConsumerConfig>();
+            return new ConsumerBuilder<Ignore, string>(config).Build();
+        });
+        builder.Services.AddHostedService<KafkaConsumer>();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+        var app = builder.Build();
+
+        Log.Information("Starting up the application");
+
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+
+        app.UseHttpsRedirection();
+
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        app.Run();
+    }
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();

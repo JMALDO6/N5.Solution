@@ -25,5 +25,12 @@ namespace N5.Domain.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<List<PermissionDocument>> GetAllAsync();
+
+        /// <summary>
+        /// Get a permission document by its ID from Elasticsearch
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<PermissionDocument?> GetPermissionByIdAsync(int id);
     }
 }
